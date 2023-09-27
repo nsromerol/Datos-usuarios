@@ -1,16 +1,14 @@
 package com.example.datosyusuarios;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
@@ -18,7 +16,6 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText editTextMessage;
     private TextView textViewMessage;
-    private static final String FILENAME = "datosUsuarios.txt";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,18 +29,15 @@ public class MainActivity extends AppCompatActivity {
         buttonSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 String message = editTextMessage.getText().toString();
 
                 try {
-
-                    FileOutputStream fos = openFileOutput(FILENAME, MODE_PRIVATE);
-                    OutputStreamWriter osw = new OutputStreamWriter(fos);
-                    osw.write(message);
-                    osw.close();
-
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    OutputStreamWriter fout = new OutputStreamWriter(openFileOutput("datosUsuarios.txt", Context.MODE_PRIVATE));
+                    fout.write(message);
+                    fout.close();
+                    editTextMessage.setText("");
+                } catch (Exception ex) {
+                    Log.e("Ficheros", "Error al escribir fichero en memoria interna");
                 }
             }
         });
@@ -53,24 +47,22 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 try {
+                    BufferedReader fin = new BufferedReader(new InputStreamReader(openFileInput("datosUsuarios.txt")));
+                    StringBuilder mensaje = new StringBuilder();
+                    String linea;
 
-                    FileInputStream fis = openFileInput(FILENAME);
-                    InputStreamReader isr = new InputStreamReader(fis);
-                    BufferedReader br = new BufferedReader(isr);
-                    StringBuilder sb = new StringBuilder();
-                    String line;
-
-                    while ((line = br.readLine()) != null) {
-                        sb.append(line).append("\n");
+                    while ((linea = fin.readLine()) != null) {
+                        mensaje.append(linea).append("\n");
                     }
 
-                    br.close();
-                    textViewMessage.setText(sb.toString());
-
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    fin.close();
+                    String mensajeCompleto = mensaje.toString();
+                    textViewMessage.setText(mensajeCompleto);
+                } catch (Exception ex) {
+                    Log.e("Ficheros", "Error al leer fichero desde memoria interna");
                 }
             }
         });
     }
 }
+
